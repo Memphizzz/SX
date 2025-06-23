@@ -20,10 +20,18 @@
 - **📁 Directory Browsing** - Explore remote directories with file sizes and dates
 - **🎨 No Dependencies** - Self-contained executables
 
-## 🎬 Quick Demo
+## 🎯 How It Works
+**Setup:** SX.Server runs on your local workstation, SX.Client runs on remote servers you SSH into.
 
+**Workflow:** 
+1. Start `sx-server` on your workstation
+2. SSH with reverse tunnel: `ssh -R 53690:localhost:53690 user@server`  
+3. From within your SSH session, use: `sxd filename` (download from workstation), `sxu filename` (upload to workstation), `sxls` (list workstation files)
+
+## 🎬 Quick Demo
+*Note: All commands below are run from within your SSH session on the remote server. From this perspective, "download" means getting files from your local workstation, and "upload" means sending files back to your workstation.*
 ```bash
-# List files on remote server with beautiful table
+# List files from your local workstation
 $ sxls
 ┌──────┬─────────────────┬──────────┬──────────────┐
 │ Type │ Name            │ Size     │ Modified     │
@@ -33,12 +41,12 @@ $ sxls
 │ FILE │ data.csv        │ 156.7 KB │ 3d ago       │
 └──────┴─────────────────┴──────────┴──────────────┘
 
-# Download with tab completion and progress
+# Download 'presentation.pdf' from your local workstation
 $ sxd presentation.pdf
 📥 Downloading: presentation.pdf (2.4 MB)
 ████████████████████████████████████████ 100% | 2.4 MB/s | 00:00:01
 
-# Upload local files
+# Upload from remote machine to your workstation
 $ sxu myfile.txt
 📤 Uploading: myfile.txt (45.2 KB)
 ████████████████████████████████████████ 100% | 1.2 MB/s | 00:00:01
@@ -74,8 +82,10 @@ dotnet --version  # Should show 9.x.x
 **Option A: Via .NET Tool**
 ```bash
 # Install globally via .NET tool
-dotnet tool install -g SX.Client
+# On your local workstation:
 dotnet tool install -g SX.Server
+# On remote servers:
+dotnet tool install -g SX.Client
 ```
 
 **Option B: Via Snap (Coming Soon!)**
@@ -88,8 +98,8 @@ dotnet tool install -g SX.Server
 ```bash
 git clone https://github.com/Memphizzz/sx
 cd sx
-dotnet pack SX.Client --configuration Release --output ./packages
-dotnet tool install --global --add-source ./packages SX.Client
+dotnet pack SX.Server --configuration Release --output ./packages
+dotnet tool install --global --add-source ./packages SX.Server
 ```
 
 ### 2. Setup Convenient Commands
@@ -124,7 +134,7 @@ alias sxls='~/.dotnet/tools/sx sxls'
 
 ```bash
 # Start SX server to serve files from a directory
-dotnet run --project SX.Server -- --dir ~/Downloads
+sx-server --dir ~/Downloads
 ```
 
 ### 4. Create SSH Tunnel
@@ -182,7 +192,7 @@ echo "source ~/.sx/sx_completion.fish" >> ~/.config/fish/config.fish
 ### Server Options
 
 ```bash
-dotnet run --project SX.Server -- [options]
+sx-server [options]
 
 Options:
   -p, --port <port>      Port to listen on (default: 53690)
@@ -196,10 +206,10 @@ Options:
 
 ```bash
 # Custom server port and directory
-dotnet run --project SX.Server -- --port 9999 --dir /data/shared
+sx-server --port 9999 --dir /data/shared
 
 # With size limits
-dotnet run --project SX.Server -- --max-size 1GB --no-overwrite
+sx-server --max-size 1GB --no-overwrite
 
 # Client using custom port
 export SX_PORT=9999
