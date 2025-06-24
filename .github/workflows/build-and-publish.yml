@@ -24,7 +24,10 @@ jobs:
 
     - name: Extract version from tag
       id: get_version
-      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/}
+        VERSION=${VERSION#v}
+        echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
     - name: Build and Pack NuGet packages
       run: |
@@ -53,7 +56,10 @@ jobs:
     - name: Extract version from tag
       if: startsWith(github.ref, 'refs/tags/')
       id: get_version
-      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/}
+        VERSION=${VERSION#v}
+        echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
     - name: Update snap version
       if: startsWith(github.ref, 'refs/tags/')
