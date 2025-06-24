@@ -27,19 +27,10 @@ confinement: classic
 apps:
   sxd:
     command: bin/SX.Client sxd
-    plugs:
-      - home
-      - network
   sxu:
     command: bin/SX.Client sxu
-    plugs:
-      - home
-      - network
   sxls:
     command: bin/SX.Client sxls
-    plugs:
-      - home
-      - network
 
 parts:
   sx-client:

@@ -28,10 +28,6 @@ confinement: classic
 apps:
   sx-server:
     command: bin/sx-server
-    plugs:
-      - home
-      - network
-      - network-bind
 
 parts:
   sx-server:
