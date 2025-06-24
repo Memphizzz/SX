@@ -348,9 +348,5 @@ healthchecksdb
 # Backup folder for Package Reference Convert tool in Visual Studio 2017
 MigrationBackup/
 
-# Temporary: Snap development files (will be added back after snap store approval)
-snap-client/
-snap-server/
-.github/workflows/
-build-snaps.sh
-SNAP_SETUP.md
+# Snap packages build output
+*.snap
