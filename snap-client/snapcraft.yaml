@@ -1,6 +1,6 @@
 name: sx-client
 base: core22
-version: '1.0.0'
+version: '1.0.5'
 summary: SSH File Transfer Client - Remote file transfer commands
 description: |
   SX Client provides the remote commands for the SX (SSH eXchange) file transfer system.

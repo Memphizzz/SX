@@ -10,7 +10,7 @@
     
     <!-- Package Metadata -->
     <PackageId>SX.Client</PackageId>
-    <PackageVersion>1.0.3</PackageVersion>
+    <PackageVersion>1.0.5</PackageVersion>
     <Authors>Memphizzz</Authors>
     <Company>SX Contributors</Company>
     <Description>SX (SSH eXchange) - Modern cross-platform file transfer system using SSH tunnels. Simple commands: sxd (download), sxu (upload), sxls (list). Features beautiful progress bars, tab completion, and secure transfers.</Description>
@@ -22,8 +22,8 @@
     <PackageTags>ssh;file-transfer;cli;dotnet-tool;cross-platform;tunnel</PackageTags>
     <PackageReleaseNotes>Initial release of SX - SSH File Transfer System with tab completion and beautiful UI.</PackageReleaseNotes>
     <Copyright>Copyright (c) 2025 SX Contributors</Copyright>
-    <AssemblyVersion>1.0.3.0</AssemblyVersion>
-    <FileVersion>1.0.3.0</FileVersion>
+    <AssemblyVersion>1.0.5.0</AssemblyVersion>
+    <FileVersion>1.0.5.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

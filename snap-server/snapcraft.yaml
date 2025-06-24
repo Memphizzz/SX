@@ -1,6 +1,6 @@
 name: sx-server
 base: core22
-version: '1.0.0'
+version: '1.0.5'
 summary: SSH File Transfer Server - Local file server for SSH tunnels
 description: |
   SX Server provides the local server component for the SX (SSH eXchange) file transfer system.

@@ -88,10 +88,16 @@ dotnet tool install -g SX.Server
 dotnet tool install -g SX.Client
 ```
 
-**Option B: Via Snap (Coming Soon!)**
+**Option B: Via Snap**
 ```bash
-# Snap packages are currently under review
-# Will be available as: sx-client and sx-server
+# Install the packages
+sudo snap install sx-client
+sudo snap install sx-server
+
+# Create command aliases (one-time setup)
+sudo snap alias sx-client.sxd sxd
+sudo snap alias sx-client.sxu sxu
+sudo snap alias sx-client.sxls sxls
 ```
 
 **Option C: Build from Source**

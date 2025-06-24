@@ -11,7 +11,7 @@
     
     <!-- Package Metadata -->
     <PackageId>SX.Server</PackageId>
-    <PackageVersion>1.0.3</PackageVersion>
+    <PackageVersion>1.0.5</PackageVersion>
     <Authors>Memphizzz</Authors>
     <Company>SX Contributors</Company>
     <Description>SX (SSH eXchange) Server - File transfer server for SSH tunnel-based transfers. Serves files and handles uploads from remote SX clients. Start with 'sx-server --dir /path/to/files'.</Description>
@@ -23,8 +23,8 @@
     <PackageTags>ssh;file-transfer;server;dotnet-tool;cross-platform;tunnel</PackageTags>
     <PackageReleaseNotes>Initial release of SX Server - SSH File Transfer Server component.</PackageReleaseNotes>
     <Copyright>Copyright (c) 2025 SX Contributors</Copyright>
-    <AssemblyVersion>1.0.3.0</AssemblyVersion>
-    <FileVersion>1.0.3.0</FileVersion>
+    <AssemblyVersion>1.0.5.0</AssemblyVersion>
+    <FileVersion>1.0.5.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
