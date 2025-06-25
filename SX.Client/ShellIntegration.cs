@@ -7,74 +7,70 @@ public static class ShellIntegration
 {
 	public static readonly string DefaultPort = "53690";
 
-	public static string GenerateBashCompletion()
-	{
-		return """
-			   #!/bin/bash
-			   # SX Shell Completion for Bash
-			   # Source this file once: source ~/.sx/sx_completion.bash
-			   # Add to ~/.bashrc: source ~/.sx/sx_completion.bash
+	public static string GenerateBashCompletion() =>
+		"""
+		#!/bin/bash
+		# SX Shell Completion for Bash
+		# Source this file once: source ~/.sx/sx_completion.bash
+		# Add to ~/.bashrc: source ~/.sx/sx_completion.bash
 
-			   _sx_complete() {
-			       local cur="${COMP_WORDS[COMP_CWORD]}"
-			       local prev="${COMP_WORDS[COMP_CWORD-1]}"
-			       local cache_dir="$HOME/.sx"
-			       
-			       case "$prev" in
-			           sxd)
-			               # Download - complete with files only
-			               if [[ -f "$cache_dir/files.cache" ]]; then
-			                   local files=$(cat "$cache_dir/files.cache" 2>/dev/null | tr '\n' ' ')
-			                   COMPREPLY=($(compgen -W "$files" -- "$cur"))
-			               fi
-			               return 0
-			               ;;
-			           sxls)
-			               # List - complete with directories only
-			               if [[ -f "$cache_dir/dirs.cache" ]]; then
-			                   local dirs=$(cat "$cache_dir/dirs.cache" 2>/dev/null | tr '\n' ' ')
-			                   COMPREPLY=($(compgen -W "$dirs" -- "$cur"))
-			               fi
-			               return 0
-			               ;;
-			       esac
-			   }
+		_sx_complete() {
+		    local cur="${COMP_WORDS[COMP_CWORD]}"
+		    local prev="${COMP_WORDS[COMP_CWORD-1]}"
+		    local cache_dir="$HOME/.sx"
+		    
+		    case "$prev" in
+		        sxd)
+		            # Download - complete with files only
+		            if [[ -f "$cache_dir/files.cache" ]]; then
+		                local files=$(cat "$cache_dir/files.cache" 2>/dev/null | tr '\n' ' ')
+		                COMPREPLY=($(compgen -W "$files" -- "$cur"))
+		            fi
+		            return 0
+		            ;;
+		        sxls)
+		            # List - complete with directories only
+		            if [[ -f "$cache_dir/dirs.cache" ]]; then
+		                local dirs=$(cat "$cache_dir/dirs.cache" 2>/dev/null | tr '\n' ' ')
+		                COMPREPLY=($(compgen -W "$dirs" -- "$cur"))
+		            fi
+		            return 0
+		            ;;
+		    esac
+		}
 
-			   complete -F _sx_complete sxd sxls
+		complete -F _sx_complete sxd sxls
 
-			   """;
-	}
+		""";
 
-	public static string GenerateFishCompletion()
-	{
-		return """
-			   # SX Shell Completion for Fish
-			   # Source this file once: source ~/.sx/sx_completion.fish
-			   # Add to ~/.config/fish/config.fish: source ~/.sx/sx_completion.fish
+	public static string GenerateFishCompletion() =>
+		"""
+		# SX Shell Completion for Fish
+		# Source this file once: source ~/.sx/sx_completion.fish
+		# Add to ~/.config/fish/config.fish: source ~/.sx/sx_completion.fish
 
-			   # Function to read cache files
-			   function __sx_files
-			       if test -f ~/.sx/files.cache
-			           cat ~/.sx/files.cache 2>/dev/null
-			       end
-			   end
+		# Function to read cache files
+		function __sx_files
+		    if test -f ~/.sx/files.cache
+		        cat ~/.sx/files.cache 2>/dev/null
+		    end
+		end
 
-			   function __sx_dirs
-			       if test -f ~/.sx/dirs.cache
-			           cat ~/.sx/dirs.cache 2>/dev/null
-			       end
-			   end
+		function __sx_dirs
+		    if test -f ~/.sx/dirs.cache
+		        cat ~/.sx/dirs.cache 2>/dev/null
+		    end
+		end
 
-			   # Clear existing completions
-			   complete -c sxd -e
-			   complete -c sxls -e
+		# Clear existing completions
+		complete -c sxd -e
+		complete -c sxls -e
 
-			   # Dynamic completions that read from cache
-			   complete -c sxd -f -a '(__sx_files)' -d 'Download file from server'
-			   complete -c sxls -f -a '(__sx_dirs)' -d 'List server directory'
+		# Dynamic completions that read from cache
+		complete -c sxd -f -a '(__sx_files)' -d 'Download file from server'
+		complete -c sxls -f -a '(__sx_dirs)' -d 'List server directory'
 
-			   """;
-	}
+		""";
 
 	public static async Task GenerateCompletionCache(List<DirectoryEntry> entries, string currentPath)
 	{
@@ -82,46 +78,46 @@ public static class ShellIntegration
 		{
 			var homeDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 			var cacheDir = Path.Combine(homeDir, ".sx");
-            
+
 			// Ensure cache directory exists
 			Directory.CreateDirectory(cacheDir);
-            
+
 			// Build file paths for current directory
 			var files = new List<string>();
 			var dirs = new List<string>();
-            
+
 			foreach (var entry in entries)
 			{
 				var fullPath = string.IsNullOrEmpty(currentPath) ? entry.Name : $"{currentPath}/{entry.Name}";
-                
+
 				if (entry.Type == EntryType.File)
 					files.Add(fullPath);
 				else
 					dirs.Add(fullPath);
 			}
-            
+
 			// Write cache files that completion scripts will read
 			await File.WriteAllLinesAsync(Path.Combine(cacheDir, "files.cache"), files);
 			await File.WriteAllLinesAsync(Path.Combine(cacheDir, "dirs.cache"), dirs);
-            
+
 			// Generate completion scripts (only once, they read from cache)
 			var bashCompletionFile = Path.Combine(cacheDir, "sx_completion.bash");
 			var fishCompletionFile = Path.Combine(cacheDir, "sx_completion.fish");
-            
+
 			if (!File.Exists(bashCompletionFile))
 			{
 				await File.WriteAllTextAsync(bashCompletionFile, GenerateBashCompletion());
 				AnsiConsole.MarkupLine("[dim]✅ Generated bash completion script in ~/.sx/sx_completion.bash[/]");
 				AnsiConsole.MarkupLine("[dim]   Add to ~/.bashrc: source ~/.sx/sx_completion.bash[/]");
 			}
-            
+
 			if (!File.Exists(fishCompletionFile))
 			{
 				await File.WriteAllTextAsync(fishCompletionFile, GenerateFishCompletion());
 				AnsiConsole.MarkupLine("[dim]✅ Generated fish completion script in ~/.sx/sx_completion.fish[/]");
 				AnsiConsole.MarkupLine("[dim]   Add to ~/.config/fish/config.fish: source ~/.sx/sx_completion.fish[/]");
 			}
-            
+
 			AnsiConsole.MarkupLine("[dim]📝 Updated completion cache[/]");
 		}
 		catch (Exception ex)
