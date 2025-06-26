@@ -55,9 +55,21 @@ $ sxu myfile.txt
 
 ## 🚀 Quick Start
 
-### Prerequisites
+### 1. Install SX
 
-SX requires .NET 9.0 or later. If you don't have it installed:
+**Option A: Via Snap (Coming Soon)**
+```bash
+# Snap packages are awaiting classic confinement approval
+# Will be available as: sx-client and sx-server
+# Track progress: https://forum.snapcraft.io/c/store-requests/classic-confinement/26
+# No prerequisites required - everything bundled!
+```
+
+**Option B: Via .NET Tool**
+
+#### Prerequisites
+
+This option requires .NET 9.0 or later. If you don't have it installed:
 
 **Ubuntu/Debian:**
 ```bash
@@ -77,25 +89,18 @@ See [Microsoft's .NET 9 installation guide](https://learn.microsoft.com/en-us/do
 dotnet --version  # Should show 9.x.x
 ```
 
-### 1. Install SX
-
-**Option A: Via .NET Tool**
+**Install via .NET tool:**
 ```bash
-# Install globally via .NET tool
 # On your local workstation:
 dotnet tool install -g SX.Server
 # On remote servers:
 dotnet tool install -g SX.Client
 ```
 
-**Option B: Via Snap (Coming Soon)**
-```bash
-# Snap packages are awaiting classic confinement approval
-# Will be available as: sx-client and sx-server
-# Track progress: https://forum.snapcraft.io/c/store-requests/classic-confinement/26
-```
-
 **Option C: Build from Source**
+
+*Note: Requires .NET 9.0 SDK*
+
 ```bash
 git clone https://github.com/Memphizzz/sx
 cd sx
@@ -340,7 +345,7 @@ rm -rf ~/.sx/
 
 ## 📋 Requirements
 
-- **.NET 9.0 or later**
+- **.NET 9.0 or later** (only for .NET Tool installation or building from source; Snap packages bundle everything)
 - **SSH 2.0 or later** (for reverse port forwarding support)
 
 ## 🚧 Known Issues & Planned Features
