@@ -1,0 +1,41 @@
+name: sx-server
+base: core22
+version: '1.0.5'
+summary: SSH File Transfer Server - Local file server for SSH tunnels
+description: |
+  SX Server provides the local server component for the SX (SSH eXchange) file transfer system.
+  Install this on your local machine to serve files via SSH tunnels to remote clients.
+  
+  Commands included:
+  - sx-server - Start the file transfer server
+  
+  Features:
+  - Serves files from configurable directory
+  - Handles uploads from remote clients
+  - Secure transfers via SSH reverse tunnels
+  - Beautiful console output with progress tracking
+  - Cross-platform .NET performance
+  
+  Usage:
+  sx-server --dir ~/Downloads --port 53690
+  
+  Note: You need SX client commands on remote machines via:
+  snap install sx-client
+
+grade: stable
+confinement: classic
+
+apps:
+  sx-server:
+    command: bin/sx-server
+
+parts:
+  sx-server:
+    plugin: nil
+    source: ..
+    override-build: |
+      # Build the server project using the GitHub Actions installed dotnet
+      export PATH="/usr/share/dotnet:$PATH"
+      /usr/share/dotnet/dotnet publish $CRAFT_PART_SRC/SX.Server/SX.Server.csproj -c Release -o $CRAFT_PART_INSTALL/bin --self-contained true -r linux-x64
+      # Make the executable file executable
+      chmod +x $CRAFT_PART_INSTALL/bin/sx-server

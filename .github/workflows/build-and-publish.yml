@@ -1,0 +1,151 @@
+name: Build and Publish Packages
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-nuget:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+
+    - name: Extract version from tag
+      id: get_version
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/}
+        VERSION=${VERSION#v}
+        echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+    - name: Build and Pack NuGet packages
+      run: |
+        dotnet pack SX.Client --configuration Release --output ./packages -p:PackageVersion=${{ steps.get_version.outputs.VERSION }}
+        dotnet pack SX.Server --configuration Release --output ./packages -p:PackageVersion=${{ steps.get_version.outputs.VERSION }}
+
+    - name: Push to NuGet
+      run: |
+        dotnet nuget push ./packages/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+
+  build-snap:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        snap: [client, server]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+
+    - name: Extract version from tag
+      if: startsWith(github.ref, 'refs/tags/')
+      id: get_version
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/}
+        VERSION=${VERSION#v}
+        echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+    - name: Update snap version
+      if: startsWith(github.ref, 'refs/tags/')
+      run: |
+        if [ "${{ matrix.snap }}" == "client" ]; then
+          sed -i "s/version: '.*'/version: '${{ steps.get_version.outputs.VERSION }}'/" snap-client/snapcraft.yaml
+        else
+          sed -i "s/version: '.*'/version: '${{ steps.get_version.outputs.VERSION }}'/" snap-server/snapcraft.yaml
+        fi
+
+    - name: Install Snapcraft
+      run: |
+        sudo snap install snapcraft --classic
+
+    - name: Build Client Snap
+      if: matrix.snap == 'client'
+      run: |
+        cd snap-client
+        sudo snapcraft --verbose --destructive-mode
+        echo "snap=$(ls *.snap)" >> $GITHUB_OUTPUT
+      id: build-client
+
+    - name: Build Server Snap  
+      if: matrix.snap == 'server'
+      run: |
+        cd snap-server
+        sudo snapcraft --verbose --destructive-mode
+        echo "snap=$(ls *.snap)" >> $GITHUB_OUTPUT
+      id: build-server
+
+    - name: Upload Client Snap Artifact
+      if: matrix.snap == 'client'
+      uses: actions/upload-artifact@v4
+      with:
+        name: sx-client-snap
+        path: "./snap-client/*.snap"
+
+    - name: Upload Server Snap Artifact
+      if: matrix.snap == 'server'
+      uses: actions/upload-artifact@v4
+      with:
+        name: sx-server-snap
+        path: "./snap-server/*.snap"
+
+    - name: Publish Client to Snap Store
+      if: matrix.snap == 'client' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+      uses: snapcore/action-publish@v1
+      env:
+        SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
+      with:
+        snap: snap-client/${{ steps.build-client.outputs.snap }}
+        release: stable
+
+    - name: Publish Server to Snap Store
+      if: matrix.snap == 'server' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+      uses: snapcore/action-publish@v1
+      env:
+        SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
+      with:
+        snap: snap-server/${{ steps.build-server.outputs.snap }}
+        release: stable
+
+  release:
+    needs: build-snap
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    
+    steps:
+    - name: Download Client Snap
+      uses: actions/download-artifact@v4
+      with:
+        name: sx-client-snap
+        path: ./snaps/
+
+    - name: Download Server Snap
+      uses: actions/download-artifact@v4
+      with:
+        name: sx-server-snap
+        path: ./snaps/
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: ./snaps/*.snap
+        generate_release_notes: true
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

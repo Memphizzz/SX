@@ -1,0 +1,44 @@
+name: sx-client
+base: core22
+version: '1.0.5'
+summary: SSH File Transfer Client - Remote file transfer commands
+description: |
+  SX Client provides the remote commands for the SX (SSH eXchange) file transfer system.
+  Install this on remote servers to transfer files via SSH tunnels.
+  
+  Commands included:
+  - sxd <file> - Download file from local server
+  - sxu <file> - Upload file to local server  
+  - sxls [path] - List files on local server
+  
+  Features:
+  - Beautiful progress bars and file tables
+  - Smart tab completion for remote paths
+  - Secure transfers via SSH tunnels
+  - Cross-platform .NET performance
+  
+  Note: You need to install the SX server on your local machine via:
+  snap install sx-server
+  or: dotnet tool install -g SX.Server
+
+grade: stable
+confinement: classic
+
+apps:
+  sxd:
+    command: bin/SX.Client sxd
+  sxu:
+    command: bin/SX.Client sxu
+  sxls:
+    command: bin/SX.Client sxls
+
+parts:
+  sx-client:
+    plugin: nil
+    source: ..
+    override-build: |
+      # Build the client project using the GitHub Actions installed dotnet
+      export PATH="/usr/share/dotnet:$PATH"
+      /usr/share/dotnet/dotnet publish $CRAFT_PART_SRC/SX.Client/SX.Client.csproj -c Release -o $CRAFT_PART_INSTALL/bin --self-contained true -r linux-x64
+      # Make the executable file executable
+      chmod +x $CRAFT_PART_INSTALL/bin/SX.Client
